@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>画面表示時間経過と画面スワイプ組み合わせ</title>
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+	rel="stylesheet"
+	integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD"
+	crossorigin="anonymous">
+</head>
+
+<body onLoad="disp()">
+	<div>
+		<p>下記両方を満たす（順不同）とリンクが表示されます。</p>
+		<p>・画面表示から１０秒経過</p>
+		<p>・エリア１を左から右に５回スワイプ</p>
+
+		<a class="text-danger" id="visi"
+			style="visibility: hidden; text-decoration: none;"
+			href="https://docs.google.com/forms/d/1xO_VWiMfq-0ym9E07x53MvJpxydrALVnN2FuRPUog-4/prefill">「次へ」</a>
+
+		<div>
+			<form action="#" name="form1">
+				<input type="text" name="field1" size="8">
+			</form>
+		</div>
+
+		<div id="container2">
+			エリア１
+			<div class="d-flex flex-row" id="swipe-area"
+				style="height: 50px; border: 2px solid #000000;">
+				<p id="number"></p>
+			</div>
+		</div>
+
+	</div>
+
+
+	<script>
+		// waitTime
+
+		var start = new Date();
+		var waitTimeFlg = false;
+
+		// 初期化
+		var hour = 0;
+		var min = 0;
+		var sec = 0;
+		var now = 0;
+		var datet = 0;
+
+		function disp() {
+
+			now = new Date();
+
+			datet = parseInt((now.getTime() - start.getTime()) / 1000);
+			if (datet >= 10) {
+				waitTimeFlg = true;
+
+				if (swipeFlg && waitTimeFlg) {
+					document.getElementById("visi").style.visibility = "visible";
+
+				}
+			}
+
+			hour = parseInt(datet / 3600);
+			min = parseInt((datet / 60) % 60);
+			sec = datet % 60;
+
+			// 数値が1桁の場合、頭に0を付けて2桁で表示する指定
+			if (hour < 10) {
+				hour = "0" + hour;
+			}
+			if (min < 10) {
+				min = "0" + min;
+			}
+			if (sec < 10) {
+				sec = "0" + sec;
+			}
+
+			// フォーマットを指定（不要な行を削除する）
+			var timer1 = hour + ':' + min + ':' + sec; // パターン1
+			var timer2 = hour + '時間' + min + '分' + sec + '秒'; // パターン2
+
+			// テキストフィールドにデータを渡す処理（不要な行を削除する）
+			document.form1.field1.value = timer1; // パターン1
+
+			setTimeout("disp()", 10);
+
+		}
+
+		// swipe
+		var swipeFlg = false;
+
+		/*
+		 * グローバル変数
+		 */
+		var no; // 数値格納用
+		var number; // 数値表示部分のDOM取得用
+
+		/*
+		 * スワイプイベント設定
+		 */
+		function setSwipe(elem) {
+			let t = document.querySelector(elem);
+			let startX; // タッチ開始 x座標
+			let startY; // タッチ開始 y座標
+			let moveX; // スワイプ中の x座標
+			let moveY; // スワイプ中の y座標
+			let dist = 30; // スワイプを感知する最低距離（ピクセル単位）
+
+			// タッチ開始時： xy座標を取得
+			t.addEventListener("touchstart", function(e) {
+				e.preventDefault();
+				startX = e.touches[0].pageX;
+				startY = e.touches[0].pageY;
+			});
+
+			// スワイプ中： xy座標を取得
+			t.addEventListener("touchmove", function(e) {
+				e.preventDefault();
+				moveX = e.changedTouches[0].pageX;
+				moveY = e.changedTouches[0].pageY;
+			});
+
+			// タッチ終了時： スワイプした距離から左右どちらにスワイプしたかを判定する/距離が短い場合何もしない
+			t.addEventListener("touchend", function(e) {
+				if (startX > moveX && startX > moveX + dist) { // 右から左にスワイプ
+					previous();
+				} else if (startX < moveX && startX + dist < moveX) { // 左から右にスワイプ
+					next();
+				}
+			});
+		}
+
+		/*
+		 * 次の番号を表示
+		 */
+		function next() {
+			no++;
+			setNumber();
+		}
+
+		/*
+		 * 前の番号を表示
+		 */
+		function previous() {
+			no--;
+			setNumber();
+		}
+
+		/*
+		 * 数値を画面に表示する
+		 */
+		function setNumber() {
+			number.innerHTML = no;
+			if (no == 5) {
+				swipeFlg = true;
+				if (waitTimeFlg && swipeFlg) {
+					document.getElementById("visi").style.visibility = "visible";
+
+				}
+			}
+		}
+
+		/*
+		 * 起動時の処理
+		 */
+		window.addEventListener("load", function() {
+			// 数値表示部分のDOM取得
+			number = document.getElementById("number");
+
+			// 数値を画面に表示
+			no = 0;
+			setNumber();
+
+			// スワイプイベント設定
+			setSwipe("#swipe-area");
+		});
+	</script>
+
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
+		crossorigin="anonymous"></script>
+</body>
+
+</html>

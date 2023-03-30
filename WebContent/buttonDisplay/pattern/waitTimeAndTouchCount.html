@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>画面表示時間経過と画面複数回タッチ組み合わせ</title>
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+	rel="stylesheet"
+	integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD"
+	crossorigin="anonymous">
+</head>
+
+<body onLoad="disp()">
+	<div>
+		<p>下記両方を満たす（順不同）とリンクが表示されます。</p>
+		<p>・画面表示から１０秒経過</p>
+		<p>・エリア１を１０回タッチ</p>
+
+		<a class="text-danger" id="visi"
+			style="visibility: hidden; text-decoration: none;"
+			href="https://docs.google.com/forms/d/1xO_VWiMfq-0ym9E07x53MvJpxydrALVnN2FuRPUog-4/prefill">「次へ」</a>
+
+		<div>
+			<form action="#" name="form1">
+				<input type="text" name="field1" size="8">
+			</form>
+		</div>
+
+		<div id="container2">
+			エリア１
+			<div onclick="incrementClick()" class="d-flex flex-row"
+				id="touch-area" style="height: 50px; border: 2px solid #000000;">
+				<p id="counter-label">0</p>
+			</div>
+		</div>
+
+	</div>
+
+
+	<script>
+		// waitTime
+
+		var start = new Date();
+		var waitTimeFlg = false;
+
+		// 初期化
+		var hour = 0;
+		var min = 0;
+		var sec = 0;
+		var now = 0;
+		var datet = 0;
+
+		function disp() {
+
+			now = new Date();
+
+			datet = parseInt((now.getTime() - start.getTime()) / 1000);
+			if (datet >= 10) {
+				waitTimeFlg = true;
+
+				if (touchCountFlg && waitTimeFlg) {
+					document.getElementById("visi").style.visibility = "visible";
+
+				}
+			}
+
+			hour = parseInt(datet / 3600);
+			min = parseInt((datet / 60) % 60);
+			sec = datet % 60;
+
+			// 数値が1桁の場合、頭に0を付けて2桁で表示する指定
+			if (hour < 10) {
+				hour = "0" + hour;
+			}
+			if (min < 10) {
+				min = "0" + min;
+			}
+			if (sec < 10) {
+				sec = "0" + sec;
+			}
+
+			// フォーマットを指定（不要な行を削除する）
+			var timer1 = hour + ':' + min + ':' + sec; // パターン1
+			var timer2 = hour + '時間' + min + '分' + sec + '秒'; // パターン2
+
+			// テキストフィールドにデータを渡す処理（不要な行を削除する）
+			document.form1.field1.value = timer1; // パターン1
+
+			setTimeout("disp()", 10);
+
+		}
+
+		// touchCount
+		var touchCountFlg = false;
+		var counterVal = 0;
+
+		function incrementClick() {
+			updateDisplay(++counterVal);
+		}
+
+		function resetCounter() {
+			counterVal = 0;
+			updateDisplay(counterVal);
+		}
+
+		function updateDisplay(val) {
+			if (val >= 10) {
+				touchCountFlg = true;
+				if (waitTimeFlg && touchCountFlg) {
+					document.getElementById("visi").style.visibility = "visible";
+
+				}
+
+			}
+			document.getElementById("counter-label").innerHTML = val;
+		}
+	</script>
+
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
+		crossorigin="anonymous"></script>
+</body>
+
+</html>
